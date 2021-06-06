@@ -5,7 +5,7 @@ docker-compose 辅助脚本
 
 ### 安装
 ```bash
-$ git clone https://github.com/perfectstorm88/dchelp
+$ git clone https://github.com/perfectstorm88/dc-help
 # init okta
 $ python setup.py install
 # 进入一个docker-compose.yml所在目录，执行对涉及的镜像自动打包

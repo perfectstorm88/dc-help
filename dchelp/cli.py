@@ -111,9 +111,9 @@ def check_dir():
         exit(-1)
         
     # 检查并创建back目录d
-    def check_back_dir():
-        if not os.path.exists(img_back_path):
-            run_cmd("mkdir -p  "+img_back_path)
+    def check_back_dir(back_path):
+        if not os.path.exists(back_path):
+            run_cmd("mkdir -p  "+back_path)
     check_back_dir('./back/image')
     check_back_dir('./back/version')
 
