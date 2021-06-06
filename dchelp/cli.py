@@ -109,6 +109,7 @@ def check_dir():
     if not os.path.exists(dc_file):
         print("执行目录错误：没有在当前目录发现docker-compose.yml！")
         exit(-1)
+        
     # 检查并创建back目录d
     def check_back_dir():
         if not os.path.exists(img_back_path):
@@ -207,6 +208,8 @@ def main_cli():
     p3.set_defaults(func=run_data)  # 将函数 与子解析器绑定
 
     import sys
+    # 先检查目录
+    check_dir()
     args = parser.parse_args(sys.argv[1:])
     args.func(args)
 
