@@ -3,6 +3,7 @@ import os,sys,subprocess
 import datetime
 
 img_back_path = './back/image/'
+temp_path = './temp/'
 def run_cmd(cmd):
 	print('执行shell:'+cmd)
 	p = subprocess.call(cmd, shell=True)
@@ -40,7 +41,38 @@ def do_image_pack():
 
 
 def do_image_unpack():
-  pass
+  imgs = read_images()
+  if not os.path.exists(temp_path):
+  run_cmd("mkdir "+temp_path)
+  for root, dirs, files in os.walk(img_back_path):  
+    for file in files:
+      if os.path.splitext(file)[1] == '.gz':
+        run_cmd("gzip -dc "+ root + file+" > "+ temp_path + os.path.splitext(file)[0])
+  unpack_list = {}
+  for root, dirs, files in os.walk(temp_path):  
+    for file in files:
+      if os.path.splitext(file)[1] == '.tar':
+        file_name = '_'.join(os.path.splitext(file)[0].split('_')[:-1])
+        file_time = os.path.splitext(file)[0].split('_')[-1]
+        unpack_list[file_name] = file_time
+  for image in imgs:
+    pair_name = image.split("/")[-1]
+    if pair_name in unpack_list:
+      result = os.popen("docker inspect -f '{{ .Created }}' "+image)
+      res = result.read().strip()
+      if res:
+        dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")
+        time = dt.strftime("%Y%m%d%H%M%S")
+        if long(unpack_list[pair_name]) > long(time):
+          p = "docker load < " + temp_path + file
+          run_cmd(p)
+        else:
+          print(image +"镜像已为最新!")
+      else:
+        p = "docker load < " + temp_path + file
+        run_cmd(p)
+  p = "rm -rf "+temp_path
+  run_cmd(p)
 
 def do_image_clear():
   """对进行进行清理
@@ -52,10 +84,10 @@ def do_image_clear():
       time = file.split('.')[0].split('_')[-1]
       if name in img_list:
         if img_list[name] <= time:
-          os.remove(path+name+"_"+img_list[name]+".tar.gz")
+          os.remove(img_back_path+name+"_"+img_list[name]+".tar.gz")
           img_list[name]=time
         else:
-          os.remove(path+name+"_"+time+".tar.gz")
+          os.remove(img_back_path+name+"_"+time+".tar.gz")
       else:
         img_list[name] = time
 
