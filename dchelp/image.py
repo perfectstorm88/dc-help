@@ -44,7 +44,6 @@ def do_image_pack():
 
 def do_image_unpack():
   imgs = read_images()
-
   unpack_list = {}
   for root, dirs, files in os.walk(img_back_path):  
     for file in files:
@@ -69,6 +68,8 @@ def do_image_unpack():
         else:
           print(image +"镜像已为最新!")
       else:
+        if not os.path.exists(temp_path):
+          run_cmd("mkdir "+temp_path)
         run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
         p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar"
         run_cmd(p)
