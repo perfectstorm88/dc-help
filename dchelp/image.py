@@ -33,10 +33,10 @@ def do_image_pack():
     res = result.read().strip()
     dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")
     time = dt.strftime("%Y%m%d%H%M%S")
-    if not os.path.exists(img_back_path+ i.split("/")[-1]+"_"+time+'.tar.gz'):
+    if not os.path.exists(img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar.gz'):
       cmd = "docker save "+ i +" > " +img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar'
       run_cmd(cmd)
-      cmd = "gzip "+ img_back_path +i.split("/")[-1]+"_"+time+'.tar'
+      cmd = "gzip "+ img_back_path +i.split("/")[-1].replace(":","___")+"_"+time+'.tar'
       run_cmd(cmd)
     else:
       print(i.split("/")[-1]+"_"+time+'.tar 已存在!')
@@ -60,7 +60,7 @@ def do_image_unpack():
       if res:
         dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")
         time = dt.strftime("%Y%m%d%H%M%S")
-        if long(unpack_list[pair_name]) > long(time):
+        if int(unpack_list[pair_name]) > int(time):
           if not os.path.exists(temp_path):
             run_cmd("mkdir "+temp_path)
           run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
