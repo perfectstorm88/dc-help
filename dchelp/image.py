@@ -31,7 +31,7 @@ def do_image_pack():
     print('打包镜像:'+i)
     result = os.popen("docker inspect -f '{{ .Created }}' "+i)
     res = result.read().strip()
-    dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")
+    dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+timedelta(hours=8)
     time = dt.strftime("%Y%m%d%H%M%S")
     if not os.path.exists(img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar.gz'):
       cmd = "docker save "+ i +" > " +img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar'
@@ -60,7 +60,7 @@ def do_image_unpack():
       result = os.popen("docker inspect -f '{{ .Created }}' "+image)
       res = result.read().strip()
       if res:
-        dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")
+        dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+timedelta(hours=8)
         time = dt.strftime("%Y%m%d%H%M%S")
         if int(unpack_list[pair_name]) > int(time):
           if not os.path.exists(temp_path):
