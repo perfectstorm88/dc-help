@@ -45,12 +45,15 @@ def do_image_pack():
 def do_image_unpack():
   imgs = read_images()
   unpack_list = {}
-  for root, dirs, files in os.walk(img_back_path):  
-    for file in files:
-      if os.path.splitext(file)[1] == '.gz':
-        file_name = '_'.join(os.path.splitext(file)[0].split('_')[:-1]).replace("___",":")
-        file_time = os.path.splitext(file)[0].split('_')[-1].split('.')[0]
-        unpack_list[file_name] = file_time
+  if os.path.exists(img_back_path):
+    for root, dirs, files in os.walk(img_back_path):  
+      for file in files:
+        if os.path.splitext(file)[1] == '.gz':
+          file_name = '_'.join(os.path.splitext(file)[0].split('_')[:-1]).replace("___",":")
+          file_time = os.path.splitext(file)[0].split('_')[-1].split('.')[0]
+          unpack_list[file_name] = file_time
+  else:
+    print("back/image文件夹不存在！")
   for image in imgs:
     pair_name = image.split("/")[-1]
     if pair_name in unpack_list:

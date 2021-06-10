@@ -125,16 +125,22 @@ def run_cmd(cmd):
 
 def file_pack(dir_name):
     # TODO 先检查文件夹是否存在
-    tar_file = './back/version/'+dir_name + '.tar.gz'
-    cmd = "tar -cvzf " + tar_file + " "+dir_name
-    run_cmd(cmd)
+    if os.path.exists('./back/version/'+dir_name):
+      tar_file = './back/version/'+dir_name + '.tar.gz'
+      cmd = "tar -cvzf " + tar_file + " "+dir_name
+      run_cmd(cmd)
+    else:
+      print('./back/version/'+dir_name+"不存在！")
 
 
 def file_unpack(dir_name):
     # TODO 先检查文件是否存在
-    tar_file = './back/version/'+dir_name + '.tar.gz'
-    cmd = "tar -xvzf " + tar_file
-    run_cmd(cmd)
+    if os.path.exists('./back/version/'+dir_name):      
+      tar_file = './back/version/'+dir_name + '.tar.gz'
+      cmd = "tar -xvzf " + tar_file
+      run_cmd(cmd)
+    else:
+      print("./back/version/" +dir_name + "不存在！")
 
 
 def image(args):
