@@ -31,7 +31,7 @@ def do_image_pack():
     print('打包镜像:'+i)
     result = os.popen("docker inspect -f '{{ .Created }}' "+i)
     res = result.read().strip()
-    dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+timedelta(hours=8)
+    dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+datetime.timedelta(hours=8)
     time = dt.strftime("%Y%m%d%H%M%S")
     if not os.path.exists(img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar.gz'):
       cmd = "docker save "+ i +" > " +img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar'
@@ -60,7 +60,7 @@ def do_image_unpack():
       result = os.popen("docker inspect -f '{{ .Created }}' "+image)
       res = result.read().strip()
       if res:
-        dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+timedelta(hours=8)
+        dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+datetime.timedelta(hours=8)
         time = dt.strftime("%Y%m%d%H%M%S")
         if int(unpack_list[pair_name]) > int(time):
           if not os.path.exists(temp_path):
@@ -86,14 +86,16 @@ def do_image_clear():
   img_list = {}
   for root, dirs, files in os.walk(img_back_path):
     for file in files:
-      name = "_".join(''.join(file.split('.')[:-2]).split('_')[:-1])
-      time = file.split('.')[0].split('_')[-1]
+      name = "_".join('.'.join(file.split('.')[:-2]).split('_')[:-1])
+      time = '.'.join(file.split('.')[:-2]).split('_')[-1]
       if name in img_list:
         if img_list[name] <= time:
           os.remove(img_back_path+name+"_"+img_list[name]+".tar.gz")
+          print("删除"+name+"_"+img_list[name]+".tar.gz")
           img_list[name]=time
         else:
           os.remove(img_back_path+name+"_"+time+".tar.gz")
+          print("删除"+name+"_"+time+".tar.gz")
       else:
         img_list[name] = time
 
