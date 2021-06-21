@@ -135,14 +135,14 @@ def file_pack(dir_name):
 
 def file_unpack(dir_name):
     # TODO 先检查文件是否存在
-    if os.path.exists('./back/version/'+dir_name):      
+    if os.path.exists('./back/version/'+dir_name+ '.tar.gz'):
       tar_file = './back/version/'+dir_name + '.tar.gz'
       cmd = "tar -xvzf " + tar_file
       run_cmd(cmd)
       cmd = 'mv ' + './back/version/'+dir_name + '.tar.gz ./'
       run_cmd(cmd)
     else:
-      print("./back/version/" +dir_name + "不存在！")
+      print("./back/version/" +dir_name + '.tar.gz'+ "不存在！")
 
 
 def image(args):
