@@ -171,7 +171,7 @@ def init_data(args):
                 if dir not in ['run-data','back','temp']:
                     cmd += dir + ' '
             break
-        if cmd != "tar -zvcf init_data.tar.gz ":
+        if cmd != "tar -zvcf back/version/init_data.tar.gz ":
             run_cmd(cmd)
         else:
             print('没有文件需要打包！')
