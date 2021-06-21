@@ -139,6 +139,8 @@ def file_unpack(dir_name):
       tar_file = './back/version/'+dir_name + '.tar.gz'
       cmd = "tar -xvzf " + tar_file
       run_cmd(cmd)
+      cmd = 'mv ' + './back/version/'+dir_name + '.tar.gz ./'
+      run_cmd(cmd)
     else:
       print("./back/version/" +dir_name + "不存在！")
 
