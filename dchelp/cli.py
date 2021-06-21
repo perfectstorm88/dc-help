@@ -125,12 +125,12 @@ def run_cmd(cmd):
 
 def file_pack(dir_name):
     # TODO 先检查文件夹是否存在
-    if os.path.exists('./back/version/'+dir_name):
+    if os.path.exists(dir_name):
       tar_file = './back/version/'+dir_name + '.tar.gz'
       cmd = "tar -cvzf " + tar_file + " "+dir_name
       run_cmd(cmd)
     else:
-      print('./back/version/'+dir_name+"不存在！")
+      print(dir_name+"不存在！")
 
 
 def file_unpack(dir_name):
@@ -144,6 +144,7 @@ def file_unpack(dir_name):
 
 
 def image(args):
+    check_dir()
     # 镜像命令
     if args.pack:
         image_util.do_image_pack()
@@ -158,12 +159,26 @@ def image(args):
 def init_data(args):
     # init-data的命令
     if args.pack:
-        file_pack('init-data')
+        check_dir()
+        cmd = "tar -zvcf init_data.tar.gz "
+        for root, dirs, files in os.walk('.'):
+            for file in files:
+                if os.path.splitext(file)[1] not in ['.tar','.gz']:
+                    cmd += file + ' '
+            for dir in dirs:
+                if dir not in ['run-data','back','temp']:
+                    cmd += dir + ' '
+            break
+        if cmd != "tar -zvcf init_data.tar.gz ":
+            run_cmd(cmd)
+        else:
+            print('没有文件需要打包！')
     if args.unpack:
         file_unpack('init-data')
 
 
 def run_data(args):
+    check_dir()
     # run-data的命令
     if args.pack:
         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
@@ -172,7 +187,7 @@ def run_data(args):
         run_cmd('docker-compose up -d ')
     if args.unpack:
         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
-        run_cmd('docker-compose down')
+        run_cmd('docker-compose down -v')
         file_unpack('run-data')
         run_cmd('docker-compose up -d ')
 
@@ -215,7 +230,7 @@ def main_cli():
 
     import sys
     # 先检查目录
-    check_dir()
+
     args = parser.parse_args(sys.argv[1:])
     args.func(args)
 
