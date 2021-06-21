@@ -160,7 +160,7 @@ def init_data(args):
     # init-data的命令
     if args.pack:
         check_dir()
-        cmd = "tar -zvcf init-data.tar.gz "
+        cmd = "tar -zvcf back/version/init-data.tar.gz "
         for root, dirs, files in os.walk('.'):
             for file in files:
                 if os.path.splitext(file)[1] not in ['.tar','.gz']:
