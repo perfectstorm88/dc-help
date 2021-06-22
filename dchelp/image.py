@@ -21,9 +21,6 @@ def read_images():
   return list(set(imgs))
 
 def do_image_pack():
-  p = "cp docker-compose.yml ./back/version/"
-  run_cmd(p)
-  imgs = read_images()
   #打包镜像
   # docker save IMAGE > xxx.tar #  或者 docker save -o xxx.tar IMAGE
   # gizp xxx.tar.gz xxx.tar  # 可以压缩为原来为三分之一
