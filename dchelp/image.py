@@ -24,6 +24,7 @@ def do_image_pack():
   #打包镜像
   # docker save IMAGE > xxx.tar #  或者 docker save -o xxx.tar IMAGE
   # gizp xxx.tar.gz xxx.tar  # 可以压缩为原来为三分之一
+  imgs = read_images()
   for i in imgs:
     print('打包镜像:'+i)
     result = os.popen("docker inspect -f '{{ .Created }}' "+i)
@@ -80,11 +81,23 @@ def do_image_unpack():
 def do_image_clear():
   """对进行进行清理
   """
+  imgs = read_images()
+  imgs1=[]
+  for i in imgs:
+    imgs1.append(i.split('/')[-1].replace(':','___'))
   img_list = {}
   for root, dirs, files in os.walk(img_back_path):
     for file in files:
+      if '_' not in file:
+        os.remove(img_back_path + file)
+        print("删除" + file)
+        continue
       name = "_".join('.'.join(file.split('.')[:-2]).split('_')[:-1])
       time = '.'.join(file.split('.')[:-2]).split('_')[-1]
+      if name not in imgs1:
+        os.remove(img_back_path + name + "_" + time + ".tar.gz")
+        print("删除" + name + "_" + time + ".tar.gz")
+        continue
       if name in img_list:
         if img_list[name] <= time:
           os.remove(img_back_path+name+"_"+img_list[name]+".tar.gz")
