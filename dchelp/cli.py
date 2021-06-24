@@ -187,9 +187,13 @@ def run_data(args):
         run_cmd('docker-compose up -d ')
     if args.unpack:
         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
-        run_cmd('docker-compose down -v')
-        file_unpack('run-data')
-        run_cmd('docker-compose up -d ')
+        result = os.popen("docker-compose ps")
+        if len(result.read().strip()) == 61:
+            file_unpack('run-data')
+        else:
+            run_cmd('docker-compose down -v')
+            file_unpack('run-data')
+            run_cmd('docker-compose up -d ')
 
 
 def main_cli():
