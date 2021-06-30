@@ -214,7 +214,7 @@ def daemon(args):
         if check_status():
             print('自动升级服务已启动！')
         else:
-            pid = subprocess.Popen("nohup sh -c 'while true; do dc-help image --upgrade; sleep 60; done > dchelp.log' &",shell=True).pid
+            pid = subprocess.Popen("nohup sh -c 'while true; do dc-help image --upgrade; sleep 60; done >> dchelp.log' &",shell=True).pid
             with open('dc-help.lock','w') as f:
                 f.write(str(pid+1))
             print('自动升级服务启动成功！')
