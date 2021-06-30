@@ -118,6 +118,8 @@ def check_dir():
     check_back_dir('./back/version')
 
 
+
+
 def run_cmd(cmd):
     print('执行shell:'+cmd)
     p = subprocess.call(cmd, shell=True)
@@ -195,6 +197,39 @@ def run_data(args):
             file_unpack('run-data')
             run_cmd('docker-compose up -d ')
 
+def daemon(args):
+    def check_status():
+        if os.path.exists('dc-help.lock'):
+            with open('dc-help.lock', 'rt') as f:
+                lines = f.readlines()
+                if lines:
+                    result = os.popen("ps -ef|grep " + lines[0].replace('\n','') + " |grep -v grep").read().strip()
+                    if result:
+                        return True
+        return False
+    check_dir()
+    if args.status:
+        print('running') if check_status() else print('not running')
+    if args.start:
+        if check_status():
+            print('自动升级服务已启动！')
+        else:
+            cmd = "nohup sh -c ' while true; do dc-help image --upgrade; sleep 60; done > dc-help.log' &"
+            run_cmd(cmd)
+            result = os.popen("ps -ef|grep while |grep -v grep").read().strip().split()[1]
+            with open('dc-help.lock','w') as f:
+                f.write(result)
+            print('自动升级服务启动成功！')
+
+    if args.stop:
+        if check_status():
+            with open('dc-help.lock', 'rt') as f:
+                lines = f.readlines()
+            run_cmd('kill -9 ' + lines[0])
+            print("自动升级服务已停止！")
+        else:
+            print('未启动自动升级服务！')
+
 
 def main_cli():
     # 创建解析对象
@@ -212,6 +247,9 @@ def main_cli():
     p3 = sub_parsers.add_parser("run-data",
                                 usage="dc-help run-data [-h] (--pack | --unpack)",
                                 help="run-data的压缩和解压缩2", add_help=True)
+    p4 = sub_parsers.add_parser("daemon",
+                                usage="dc-help daemon [-h] (--status | --start | --stop)",
+                                help="daemon的状态、启动和停止", add_help=True)
     # 互斥，且至少需要一个参数
     group = p1.add_mutually_exclusive_group(required=True)
     group.add_argument('--pack', action='store_true', help="对镜像进行自动打包")
@@ -231,6 +269,12 @@ def main_cli():
     group.add_argument('--pack', action='store_true', help="对run-data进行自动打包")
     group.add_argument('--unpack', action='store_true', help="对run-data进行自动解包")
     p3.set_defaults(func=run_data)  # 将函数 与子解析器绑定
+
+    group = p4.add_mutually_exclusive_group(required=True)
+    group.add_argument('--status', action='store_true', help="查看自动升级服务的状态，running 或 not running")
+    group.add_argument('--start', action='store_true', help="启动自动升级服务")
+    group.add_argument('--stop', action='store_true', help="停止自动升级服务")
+    p4.set_defaults(func=daemon)  # 将函数 与子解析器绑定
 
     import sys
     # 先检查目录
