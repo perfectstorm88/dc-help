@@ -199,8 +199,8 @@ def run_data(args):
 
 def daemon(args):
     def check_status():
-        if os.path.exists('dc-help.lock'):
-            with open('dc-help.lock', 'rt') as f:
+        if os.path.exists('.dc-help.lock'):
+            with open('.dc-help.lock', 'rt') as f:
                 lines = f.readlines()
                 if lines:
                     result = os.popen("ps -ef|grep " + lines[0].replace('\n','') + " |grep -v grep").read().strip()
@@ -209,19 +209,22 @@ def daemon(args):
         return False
     check_dir()
     if args.status:
-        print('running') if check_status() else print('not running')
+        if check_status():
+            print('running') 
+        else:
+            print('not running')
     if args.start:
         if check_status():
             print('自动升级服务已启动！')
         else:
             pid = subprocess.Popen("nohup sh -c 'while true; do dc-help image --upgrade; sleep 60; done >> dchelp.log' &",shell=True).pid
-            with open('dc-help.lock','w') as f:
+            with open('.dc-help.lock','w') as f:
                 f.write(str(pid+1))
             print('自动升级服务启动成功！')
 
     if args.stop:
         if check_status():
-            with open('dc-help.lock', 'rt') as f:
+            with open('.dc-help.lock', 'rt') as f:
                 lines = f.readlines()
             run_cmd('kill -9 ' + lines[0])
             print("自动升级服务已停止！")

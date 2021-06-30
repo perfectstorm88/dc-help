@@ -12,7 +12,7 @@ except Exception as e:
 
 setup(
     name = "dc-help",
-    version = "0.0.2",
+    version = "0.0.3",
     keywords = ["pip", "docker-compose", "cli", "docker", "helper"],
     description = "docker-compose helper",
     long_description = long_description,
@@ -24,7 +24,7 @@ setup(
     author = "perfectstorm88",
     author_email = "perfectstorm88@163.com",
 
-    packages = find_packages(),
+    packages=find_packages(include=['dchelp']),
     include_package_data = True,
     install_requires = [""],
     platforms = "any",
