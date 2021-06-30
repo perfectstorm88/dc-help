@@ -7,6 +7,7 @@ temp_path = './temp/'
 def run_cmd(cmd):
   print('执行shell:'+cmd)
   p = subprocess.call(cmd, shell=True)
+  return p
 
 def read_images():
   dc_file = 'docker-compose.yml'
@@ -43,13 +44,18 @@ def do_image_pack():
 def do_image_unpack():
   imgs = read_images()
   unpack_list = {}
+  error = 0
   if os.path.exists(img_back_path):
     for root, dirs, files in os.walk(img_back_path):  
       for file in files:
         if os.path.splitext(file)[1] == '.gz':
           file_name = '_'.join(os.path.splitext(file)[0].split('_')[:-1]).replace("___",":")
           file_time = os.path.splitext(file)[0].split('_')[-1].split('.')[0]
-          unpack_list[file_name] = file_time
+          if file_name in unpack_list:
+            if int(file_time) > int(unpack_list[file_name]):
+              unpack_list[file_name] = file_time
+          else:
+            unpack_list[file_name] = file_time
   else:
     print("back/image文件夹不存在！")
   for image in imgs:
@@ -63,21 +69,37 @@ def do_image_unpack():
         if int(unpack_list[pair_name]) > int(time):
           if not os.path.exists(temp_path):
             run_cmd("mkdir "+temp_path)
-          run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
+          r = run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
+          if r:
+            print(image+'文件异常！')
+            error = 1
+            break
           p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar"
-          run_cmd(p)
+          r = run_cmd(p)
+          if r:
+            print(image+'镜像加载异常！')
+            error =1
+            break
         else:
           print(image +"镜像已为最新!")
       else:
         if not os.path.exists(temp_path):
           run_cmd("mkdir "+temp_path)
-        run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
+        r = run_cmd("gzip -dc "+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar")
+        if r:
+          print(image + '文件异常！')
+          error = 1
+          break
         p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name] + ".tar"
-        run_cmd(p)
+        r = run_cmd(p)
+        if r:
+          print(image + '镜像加载异常！')
+          error = 1
+          break
   if os.path.exists(temp_path):
     p = "rm -rf "+temp_path
     run_cmd(p)
-
+  return error
 def do_image_clear():
   """对进行进行清理
   """
@@ -110,5 +132,6 @@ def do_image_clear():
         img_list[name] = time
 
 def do_image_upgrade():
-  do_image_unpack()
-  run_cmd('docker-compose up -d')
+  error = do_image_unpack()
+  if error == 0:
+    run_cmd('docker-compose up -d')
