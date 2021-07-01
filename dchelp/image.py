@@ -51,11 +51,12 @@ def do_image_unpack():
         if os.path.splitext(file)[1] == '.gz':
           file_name = '_'.join(os.path.splitext(file)[0].split('_')[:-1]).replace("___",":")
           file_time = os.path.splitext(file)[0].split('_')[-1].split('.')[0]
-          if file_name in unpack_list:
-            if int(file_time) > int(unpack_list[file_name]):
+          if file_name and file_time.isdigit():
+            if file_name in unpack_list:
+              if int(file_time) > int(unpack_list[file_name]):
+                unpack_list[file_name] = file_time
+            else:
               unpack_list[file_name] = file_time
-          else:
-            unpack_list[file_name] = file_time
   else:
     print("back/image文件夹不存在！")
   for image in imgs:
