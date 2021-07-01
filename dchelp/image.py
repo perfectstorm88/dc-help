@@ -111,26 +111,30 @@ def do_image_clear():
   img_list = {}
   for root, dirs, files in os.walk(img_back_path):
     for file in files:
-      if '_' not in file:
+      if os.path.splitext(file)[1] == '.gz':
+        name = "_".join('.'.join(file.split('.')[:-2]).split('_')[:-1])
+        time = '.'.join(file.split('.')[:-2]).split('_')[-1]
+        if not name or not time.isdigit():
+          os.remove(img_back_path + file)
+          print("删除" + file)
+          continue
+        if name not in imgs1:
+          os.remove(img_back_path + name + "_" + time + ".tar.gz")
+          print("删除" + name + "_" + time + ".tar.gz")
+          continue
+        if name in img_list:
+          if img_list[name] <= time:
+            os.remove(img_back_path+name+"_"+img_list[name]+".tar.gz")
+            print("删除"+name+"_"+img_list[name]+".tar.gz")
+            img_list[name]=time
+          else:
+            os.remove(img_back_path+name+"_"+time+".tar.gz")
+            print("删除"+name+"_"+time+".tar.gz")
+        else:
+          img_list[name] = time
+      else:
         os.remove(img_back_path + file)
         print("删除" + file)
-        continue
-      name = "_".join('.'.join(file.split('.')[:-2]).split('_')[:-1])
-      time = '.'.join(file.split('.')[:-2]).split('_')[-1]
-      if name not in imgs1:
-        os.remove(img_back_path + name + "_" + time + ".tar.gz")
-        print("删除" + name + "_" + time + ".tar.gz")
-        continue
-      if name in img_list:
-        if img_list[name] <= time:
-          os.remove(img_back_path+name+"_"+img_list[name]+".tar.gz")
-          print("删除"+name+"_"+img_list[name]+".tar.gz")
-          img_list[name]=time
-        else:
-          os.remove(img_back_path+name+"_"+time+".tar.gz")
-          print("删除"+name+"_"+time+".tar.gz")
-      else:
-        img_list[name] = time
 
 def do_image_upgrade():
   error = do_image_unpack()
