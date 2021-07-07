@@ -149,7 +149,7 @@ def image(args):
     check_dir()
     # 镜像命令
     if args.pack:
-        image_util.do_image_pack()
+        image_util.do_image_pack(args.bytes)
     if args.unpack:
         image_util.do_image_unpack()
     if args.clear:
@@ -254,6 +254,7 @@ def main_cli():
                                 usage="dc-help daemon [-h] (--status | --start | --stop)",
                                 help="daemon的状态、启动和停止", add_help=True)
     # 互斥，且至少需要一个参数
+    p1.add_argument('-b', '--bytes', help='设置分包大小', default= '', nargs='?')
     group = p1.add_mutually_exclusive_group(required=True)
     group.add_argument('--pack', action='store_true', help="对镜像进行自动打包")
     group.add_argument('--unpack', action='store_true', help="对镜像进行自动装载")
