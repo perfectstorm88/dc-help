@@ -30,6 +30,9 @@ def do_image_pack(split_size):
     print('打包镜像:'+i)
     result = os.popen("docker inspect -f '{{ .Created }}' "+i)
     res = result.read().strip()
+    if not res:
+      print(i+'镜像不存在！')
+      continue
     dt = datetime.datetime.strptime(res[:26],"%Y-%m-%dT%H:%M:%S.%f")+datetime.timedelta(hours=8)
     time = dt.strftime("%Y%m%d%H%M%S")
     if not os.path.exists(img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar.gz') and not os.path.exists(img_back_path+ i.split("/")[-1].replace(":","___")+"_"+time+'.tar.gz.part-00'):
@@ -86,19 +89,32 @@ def do_image_unpack():
           if not os.path.exists(temp_path):
             run_cmd("mkdir "+temp_path)
           if unpack_list[pair_name][1]:#分包文件，需合并
-              cmd = 'cat '+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name][0] + '.tar.gz.part-* > ' + temp_path +pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz"
-              run_cmd(cmd)
-          r = run_cmd("gzip -dc "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz > "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
-          if r:
-            print(image+'文件异常！')
-            error = 1
-            break
-          p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
-          r = run_cmd(p)
-          if r:
-            print(image+'镜像加载异常！')
-            error =1
-            break
+            cmd = 'cat '+ img_back_path + pair_name.replace(":","___") + "_" + unpack_list[pair_name][0] + '.tar.gz.part-* > ' + temp_path +pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz"
+            run_cmd(cmd)
+            r = run_cmd("gzip -dc "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz > "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
+            if r:
+              print(image+'文件异常！')
+              error = 1
+              break
+            p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
+            r = run_cmd(p)
+            if r:
+              print(image+'镜像加载异常！')
+              error =1
+              break
+          else:
+            r = run_cmd("gzip -dc " + img_back_path + pair_name.replace(":", "___") + "_" + unpack_list[pair_name][
+              0] + ".tar.gz > " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
+            if r:
+              print(image + '文件异常！')
+              error = 1
+              break
+            p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
+            r = run_cmd(p)
+            if r:
+              print(image + '镜像加载异常！')
+              error = 1
+              break
         else:
           print(image +"镜像已为最新!")
       else:
@@ -107,17 +123,30 @@ def do_image_unpack():
         if unpack_list[pair_name][1]:  # 分包文件，需合并
           cmd = 'cat ' + img_back_path + pair_name.replace(":", "___") + "_" + unpack_list[pair_name][0] + '.tar.gz.part-* > ' + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz"
           run_cmd(cmd)
-        r = run_cmd("gzip -dc "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
-        if r:
-          print(image + '文件异常！')
-          error = 1
-          break
-        p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
-        r = run_cmd(p)
-        if r:
-          print(image + '镜像加载异常！')
-          error = 1
-          break
+          r = run_cmd("gzip -dc "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar.gz" +" > "+ temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
+          if r:
+            print(image + '文件异常！')
+            error = 1
+            break
+          p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
+          r = run_cmd(p)
+          if r:
+            print(image + '镜像加载异常！')
+            error = 1
+            break
+        else:
+          r = run_cmd("gzip -dc " + img_back_path + pair_name.replace(":", "___") + "_" + unpack_list[pair_name][
+            0] + ".tar.gz" + " > " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar")
+          if r:
+            print(image + '文件异常！')
+            error = 1
+            break
+          p = "docker load < " + temp_path + pair_name + "_" + unpack_list[pair_name][0] + ".tar"
+          r = run_cmd(p)
+          if r:
+            print(image + '镜像加载异常！')
+            error = 1
+            break
   if os.path.exists(temp_path):
     p = "rm -rf "+temp_path
     run_cmd(p)
