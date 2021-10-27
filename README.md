@@ -21,14 +21,14 @@
 
 - [产品]-deplopy:
   - **docker-compose.yml**: 主文件
-  - **init-data**： 初始化的数据，如数据库脚本、程序加载时的初始数据等
+  - **conf**： 配置文件，如nginx配置，mysql配置文件等
     - `web/nginx.conf`: nginx的配置文件夹，例如路由配置，安全设置等。
     - `web/ca/` :nginx的证书文件目录。
-    - `mysql/` :msql的初始化脚本等
-    - `mongo/` :mongodb的初始化脚本等
-  - **run-data**: 运行过程中的数据，如数据库存储目录，程序的临时文件目录
+    - `mysql/` :msql的配置文件等
+  - **data**: 运行过程中的数据，如数据库存储目录，程序的临时文件目录
     - `mysql/` :msql的数据库文件目录
     - `mongo/` :mongodb的数据库文件目录
+  - **jar**: 包含服务用的jar文件、或者其他格式的代码打包文件等
   - **log**: 程序日志目标
   - **back**: 程序备份目录
 
@@ -50,14 +50,13 @@ usage: dc-help COMMAND
 docker-compose辅助工具,帮助管理镜像、版本文件
 
 optional arguments:
-  -h, --help            show this help message and exit
+  -h, --help           show this help message and exit
 
 COMMAND:
-  {image,init-data,run-data}
-    image               管理docker-compose.yml中的镜像，打包、装载
-                        、清理、升级
-    init-data           init-data的压缩和解压缩
-    run-data            run-data的压缩和解压缩2
+  {image,file,daemon}
+    image              管理docker-compose.yml中的镜像，打包、装载、清理、升级
+    file               对文件夹进行压缩和解压缩,默认是conf、data、jar等文件夹
+    daemon             daemon的状态、启动和停止
 ```
 
 其中`dc-help image -h`
@@ -79,11 +78,11 @@ optional arguments:
 *  [x] `dc-help image --unpack`：对项目的镜像进行自动装载
 *  [x] `dc-help image --clear`：对项目的镜像进行清理
 *  [x] `dc-help image --upgrade`：扫描备份目录，判断是否有镜像更新，进行自动装载，更新集群服务
-*  [x] `dc-help init-data --pack`：对项目的init-data文件进行自动打包压缩
-*  [x] `dc-help init-data --pack`：对项目的init-data文件进行自动解压缩
-*  [x] `dc-help run-data --pack`：对项目的run-data文件进行自动打包压缩
-*  [x] `dc-help run-data --pack`：对项目的run-data文件进行自动解压缩
-
+*  [x] `dc-help file --pack`：对项目的配置和数据文件进行自动打包压缩
+*  [x] `dc-help file --unpack`：对项目的配置和数据文件进行自动解压缩
+*  [x] `dc-help daemon --status`：查看自动升级服务的状态，running 或 not running
+*  [x] `dc-help daemon --start`：启动自动升级服务
+*  [x] `dc-help daemon --stop`：停止自动升级服务
 ## 参考
 
 - [How to get exact date for docker images?如何抽取镜像时间](https://stackoverflow.com/questions/32705176/how-to-get-exact-date-for-docker-images)

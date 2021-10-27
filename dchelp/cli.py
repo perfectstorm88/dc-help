@@ -115,7 +115,7 @@ def check_dir():
         if not os.path.exists(back_path):
             run_cmd("mkdir -p  "+back_path)
     check_back_dir('./back/image')
-    check_back_dir('./back/version')
+    check_back_dir('./back/file')
 
 
 
@@ -125,24 +125,24 @@ def run_cmd(cmd):
     p = subprocess.call(cmd, shell=True)
 
 
-def file_pack(dir_name):
-    # TODO 先检查文件夹是否存在
-    if os.path.exists(dir_name):
-      tar_file = './back/version/'+dir_name + '.tar.gz'
-      cmd = "tar -cvzf " + tar_file + " "+dir_name
-      run_cmd(cmd)
-    else:
-      print(dir_name+"不存在！")
+# def file_pack(dir_name):
+#     # TODO 先检查文件夹是否存在
+#     if os.path.exists(dir_name):
+#       tar_file = './back/version/'+dir_name + '.tar.gz'
+#       cmd = "tar -cvzf " + tar_file + " "+dir_name
+#       run_cmd(cmd)
+#     else:
+#       print(dir_name+"不存在！")
 
 
-def file_unpack(dir_name):
-    # TODO 先检查文件是否存在
-    if os.path.exists('./back/version/'+dir_name+ '.tar.gz'):
-      tar_file = './back/version/'+dir_name + '.tar.gz'
-      cmd = "tar -xvzf " + tar_file
-      run_cmd(cmd)
-    else:
-      print("./back/version/" +dir_name + '.tar.gz'+ "不存在！")
+# def file_unpack(dir_name):
+#     # TODO 先检查文件是否存在
+#     if os.path.exists('./back/version/'+dir_name+ '.tar.gz'):
+#       tar_file = './back/version/'+dir_name + '.tar.gz'
+#       cmd = "tar -xvzf " + tar_file
+#       run_cmd(cmd)
+#     else:
+#       print("./back/version/" +dir_name + '.tar.gz'+ "不存在！")
 
 
 def image(args):
@@ -158,44 +158,78 @@ def image(args):
         image_util.do_image_upgrade()
 
 
-def init_data(args):
-    # init-data的命令
-    if args.pack:
-        check_dir()
-        cmd = "tar -zvcf back/version/init-data.tar.gz "
-        for root, dirs, files in os.walk('.'):
-            for file in files:
-                if os.path.splitext(file)[1] not in ['.tar','.gz']:
-                    cmd += file + ' '
-            for dir in dirs:
-                if dir not in ['run-data','back','temp']:
-                    cmd += dir + ' '
-            break
-        if cmd != "tar -zvcf back/version/init-data.tar.gz ":
-            run_cmd(cmd)
-        else:
-            print('没有文件需要打包！')
-    if args.unpack:
-        file_unpack('init-data')
+# def init_data(args):
+#     # init-data的命令
+#     if args.pack:
+#         check_dir()
+#         cmd = "tar -zvcf back/version/init-data.tar.gz "
+#         for root, dirs, files in os.walk('.'):
+#             for file in files:
+#                 if os.path.splitext(file)[1] not in ['.tar','.gz']:
+#                     cmd += file + ' '
+#             for dir in dirs:
+#                 if dir not in ['run-data','back','temp']:
+#                     cmd += dir + ' '
+#             break
+#         if cmd != "tar -zvcf back/version/init-data.tar.gz ":
+#             run_cmd(cmd)
+#         else:
+#             print('没有文件需要打包！')
+#     if args.unpack:
+#         file_unpack('init-data')
 
 
-def run_data(args):
-    check_dir()
-    # run-data的命令
-    if args.pack:
+default_dir_list = ['data','jar','conf']
+def process_file(args):
+    print(args)
+    if args.restart:
         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
         run_cmd('docker-compose down')
-        file_pack('run-data')
-        run_cmd('docker-compose up -d ')
+    if args.pack is not None:
+        dir_list = args.pack if args.pack else default_dir_list
+        for x in dir_list:
+            # 检查x存在，并且是文件夹才继续，否则跳过
+            if os.path.exists(x) and os.path.isdir(x):
+                cmd = f"tar -zvcf back/file/{x}.tar.gz {x}"
+                # 如果是conf文件夹,会自动包含docker-compose.xml文件
+                if x == 'conf':
+                    cmd = cmd + ' docker-compose.xml'
+                run_cmd(cmd)
+            else:
+                print(f'文件夹不存在:{x}')
+
+
     if args.unpack:
-        # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
-        result = os.popen("docker-compose ps")
-        if len(result.read().strip()) == 61:
-            file_unpack('run-data')
-        else:
-            run_cmd('docker-compose down -v')
-            file_unpack('run-data')
-            run_cmd('docker-compose up -d ')
+        dir_list = args.unpack if args.pack else default_dir_list
+        for x in dir_list:
+            # 检查x存在，并且是文件夹才继续，否则跳过
+            tar_file= f'back/file/{x}.tar.gz'
+            if os.path.exists(tar_file) and os.path.isfile(x):
+                cmd = f'tar -zvcf {tar_file}'
+                run_cmd(cmd)
+            else:
+                print(f'文件不存在:{tar_file}')
+
+    if args.restart:
+        run_cmd('docker-compose up -d ')
+
+# def run_data(args):
+#     # check_dir()
+#     # run-data的命令
+#     if args.pack:
+#         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
+#         run_cmd('docker-compose down')
+#         file_pack('run-data')
+#         run_cmd('docker-compose up -d ')
+#     if args.unpack:
+#         # TODO 先停止 'docker-compose down'，先记录当前状态，再决定是否恢复
+#         result = os.popen("docker-compose ps")
+#         if len(result.read().strip()) == 61:
+#             file_unpack('run-data')
+#         else:
+#             run_cmd('docker-compose down -v')
+#             file_unpack('run-data')
+#             run_cmd('docker-compose up -d ')
 
 def daemon(args):
     def check_status():
@@ -244,12 +278,12 @@ def main_cli():
     p1 = sub_parsers.add_parser("image",
                                 usage='dc-help COMMAND image [-h] (--pack | --unpack | --clear | --upgrade)',
                                 help="管理docker-compose.yml中的镜像，打包、装载、清理、升级")
-    p2 = sub_parsers.add_parser("init-data",
-                                usage="dc-help init-data [-h] (--pack | --unpack)",
-                                help="init-data的压缩和解压缩")
-    p3 = sub_parsers.add_parser("run-data",
-                                usage="dc-help run-data [-h] (--pack | --unpack)",
-                                help="run-data的压缩和解压缩2", add_help=True)
+    p2 = sub_parsers.add_parser("file",
+                                usage="dc-help file [-h] (--pack | --unpack)",
+                                help="对文件夹进行压缩和解压缩,默认是conf、log之外的所有文件夹")
+    # p3 = sub_parsers.add_parser("run-data",
+    #                             usage="dc-help run-data [-h] (--pack | --unpack)",
+    #                             help="run-data的压缩和解压缩2", add_help=True)
     p4 = sub_parsers.add_parser("daemon",
                                 usage="dc-help daemon [-h] (--status | --start | --stop)",
                                 help="daemon的状态、启动和停止", add_help=True)
@@ -264,15 +298,16 @@ def main_cli():
     p1.set_defaults(func=image)  # 将函数 与子解析器绑定
 
     group = p2.add_mutually_exclusive_group(required=True)
-    group.add_argument('--pack', action='store_true', help="对init-data进行自动打包")
-    group.add_argument('--unpack', action='store_true',
-                       help="对init-data进行自动解包")
-    p2.set_defaults(func=init_data)   # 将函数 与子解析器绑定
+    group.add_argument('--pack', type=str, nargs='*', help="对文件夹进行自动打包")
+    group.add_argument('--unpack', type=str, nargs='*',
+                       help="对文件夹进行自动解包")
+    p2.add_argument('--restart', action='store_true',help="是否重启服务,默认不重启")
+    p2.set_defaults(func=process_file)   # 将函数 与子解析器绑定
 
-    group = p3.add_mutually_exclusive_group(required=True)
-    group.add_argument('--pack', action='store_true', help="对run-data进行自动打包")
-    group.add_argument('--unpack', action='store_true', help="对run-data进行自动解包")
-    p3.set_defaults(func=run_data)  # 将函数 与子解析器绑定
+    # group = p3.add_mutually_exclusive_group(required=True)
+    # group.add_argument('--pack', action='store_true', help="对run-data进行自动打包")
+    # group.add_argument('--unpack', action='store_true', help="对run-data进行自动解包")
+    # p3.set_defaults(func=run_data)  # 将函数 与子解析器绑定
 
     group = p4.add_mutually_exclusive_group(required=True)
     group.add_argument('--status', action='store_true', help="查看自动升级服务的状态，running 或 not running")
