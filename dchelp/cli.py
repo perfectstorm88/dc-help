@@ -190,25 +190,25 @@ def process_file(args):
         for x in dir_list:
             # 检查x存在，并且是文件夹才继续，否则跳过
             if os.path.exists(x) and os.path.isdir(x):
-                cmd = f"tar -zvcf back/file/{x}.tar.gz {x}"
+                cmd = 'tar -zvcf back/file/' + x + '.tar.gz ' + x
                 # 如果是conf文件夹,会自动包含docker-compose.xml文件
                 if x == 'conf':
                     cmd = cmd + ' docker-compose.yml'
                 run_cmd(cmd)
             else:
-                print(f'文件夹不存在:{x}')
+                print('文件夹不存在:' + x)
 
 
     if args.unpack is not None:
         dir_list = args.unpack if args.unpack else default_dir_list
         for x in dir_list:
             # 检查x存在，并且是文件夹才继续，否则跳过
-            tar_file= f'back/file/{x}.tar.gz'
+            tar_file= 'back/file/' + x + '.tar.gz'
             if os.path.exists(tar_file) and os.path.isfile(tar_file):
-                cmd = f'tar -zvxf {tar_file}'
+                cmd = 'tar -zvxf ' + tar_file + ''
                 run_cmd(cmd)
             else:
-                print(f'文件不存在:{tar_file}')
+                print(f'文件不存在:' + tar_file + '')
 
     if args.restart:
         run_cmd('docker-compose up -d ')
