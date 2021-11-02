@@ -205,10 +205,10 @@ def process_file(args):
             # 检查x存在，并且是文件夹才继续，否则跳过
             tar_file= 'back/file/' + x + '.tar.gz'
             if os.path.exists(tar_file) and os.path.isfile(tar_file):
-                cmd = 'tar -zvxf ' + tar_file + ''
+                cmd = 'tar -zvxf ' + tar_file 
                 run_cmd(cmd)
             else:
-                print(f'文件不存在:' + tar_file + '')
+                print('文件不存在:' + tar_file)
 
     if args.restart:
         run_cmd('docker-compose up -d ')
