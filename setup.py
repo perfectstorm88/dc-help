@@ -12,7 +12,7 @@ except Exception as e:
 
 setup(
     name = "dc-help",
-    version = "0.1.0",
+    version = "0.1.1",
     keywords = ["pip", "docker-compose", "cli", "docker", "helper"],
     description = "docker-compose helper",
     long_description = long_description,
