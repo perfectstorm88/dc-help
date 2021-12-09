@@ -152,10 +152,10 @@ def image(args):
         image_util.do_image_pack(args.bytes)
     if args.unpack:
         image_util.do_image_unpack()
-    if args.clear:
-        image_util.do_image_clear()
     if args.upgrade:
         image_util.do_image_upgrade()
+    if args.clear:
+        image_util.do_image_clear()
 
 
 # def init_data(args):
@@ -276,25 +276,25 @@ def main_cli():
     sub_parsers = parser.add_subparsers(title="COMMAND",)
     # 创建一个子命令
     p1 = sub_parsers.add_parser("image",
-                                usage='dc-help COMMAND image [-h] (--pack | --unpack | --clear | --upgrade)',
+                                # usage='dc-help COMMAND image [-h] (--pack | --unpack | --upgrade) --clear ',
                                 help="管理docker-compose.yml中的镜像，打包、装载、清理、升级")
     p2 = sub_parsers.add_parser("file",
-                                usage="dc-help file [-h] (--pack | --unpack)",
+                                # usage="dc-help file [-h] (--pack | --unpack)",
                                 help="对文件夹进行压缩和解压缩,默认是conf、log之外的所有文件夹")
     # p3 = sub_parsers.add_parser("run-data",
     #                             usage="dc-help run-data [-h] (--pack | --unpack)",
     #                             help="run-data的压缩和解压缩2", add_help=True)
     p4 = sub_parsers.add_parser("daemon",
-                                usage="dc-help daemon [-h] (--status | --start | --stop)",
+                                # usage="dc-help daemon [-h] (--status | --start | --stop)",
                                 help="daemon的状态、启动和停止", add_help=True)
     # 互斥，且至少需要一个参数
-    p1.add_argument('-b', '--bytes', help='设置分包大小', default= '', nargs='?')
+    p1.add_argument('-b', '--bytes', help='如果单个文件比较大，可以进行拆包，设置分包大小', default= '', nargs='?')
     group = p1.add_mutually_exclusive_group(required=True)
     group.add_argument('--pack', action='store_true', help="对镜像进行自动打包")
     group.add_argument('--unpack', action='store_true', help="对镜像进行自动装载")
-    group.add_argument('--clear', action='store_true', help="对镜像文件进行清理")
     group.add_argument('--upgrade', action='store_true',
                        help="对镜像文件进行自动装载，然后升级")
+    p1.add_argument('--clear', action='store_true', help="对历史镜像文件进行清理")
     p1.set_defaults(func=image)  # 将函数 与子解析器绑定
 
     group = p2.add_mutually_exclusive_group(required=True)
